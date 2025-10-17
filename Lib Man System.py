@@ -6,6 +6,7 @@ class Book:
         self.Publisher=""
         self.YoP=""
         self.Availability=""
+        self.Activation=""
         self.Description=""
         self.AuthorInfo=[]
     def addBook(self):
@@ -16,6 +17,7 @@ class Book:
         self.YoP= input("Enter the year of publication:")
         self.Description= input("Please enter the book Description")
         self.Availability="Available"
+        self.Activation="Current"
     def editBook(self):
         self.BookID = input("Enter book ID:")
         self.Title = input("Enter the new title:")
@@ -23,7 +25,7 @@ class Book:
         self.Publisher = input("Enter the new publisher:")
         self.YoP = input("Enter the new year of publication:")
         self.Description = input("Please enter the new book description")
-    def deleteBook(self):
+        self.Activation = input("Please enter whether the book is 'Current' or 'Previous'")
 
     def displayBook(self):
         print("Book ID:", self.BookID)
@@ -33,6 +35,7 @@ class Book:
         print("Year of Publication:", self.YoP)
         print("Description:", self.Description)
         print(self.Availability, "to borrow")
+        print("Status in System:", self.Activation)
     def borrowBook(self):
         self.Availability="Unavailable"
     def returnBook(self):
