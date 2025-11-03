@@ -37,3 +37,38 @@ class Book:
         print(self.Availability, "to borrow")
         print("Status in System:", self.Activation)
 
+class Member:
+    def __init__(self):
+        self.member_id = ""
+        self.member_name = ""
+        self.libCardnumber = ""
+        self.password = ""
+        self.status = ""
+        self.booksborrowed = []
+
+
+    def add_member(self):
+        self.member_id = input("Enter Member ID:")
+        self.member_name = input("Enter Member Name:")
+        self.libCardnumber = input("Enter Library Card Number:")
+        self.password = input("Create Password:")
+        self.status = "Active"
+        print("Member", self.member_name, "added successfully. Status: ", self.status)
+
+    def unsubscribe_member(self):
+        confirm = input("Do you want to unsubscribe? (yes/no): ")
+        if confirm == "yes":
+            self.status = "Inactive"
+            print(self.member_name, "is now unsubscribed.")
+        else:
+            print("Unsubscribe cancelled.")
+
+    def borrow_book(self, book_title):
+        if self.status != "Active":
+            print("Member", self.member_name, "is Inactive and cannot borrow books.")
+
+        self.booksborrowed.append(book_title)
+        print(book_title, "borrowed successfully by", self.member_name)
+
+    def display_status(self):
+        print("Member: ", self.member_name,"| Status: ", self.status, "| Books Borrowed: ", self.booksborrowed)
