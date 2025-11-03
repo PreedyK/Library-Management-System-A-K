@@ -69,12 +69,6 @@ class Member:
         if self.status != "Active":
             print("Member", self.member_name, "is Inactive and cannot borrow books.")
             return
-        if book.Availability != "Available": 
-            print(book.Title, "is not available right now.") 
-            return
-  def borrow_book(self, book_title):
-        if self.status != "Active":
-            print("Member", self.member_name, "is Inactive and cannot borrow books.")
         else:
             if b.Activation != "Current:
                 print("Sorry, this book is not current in the system")
@@ -82,7 +76,7 @@ class Member:
                 if b.Availability == "Available":
                     b.Availability="Unavailable"
                     self.booksborrowed.append(book_title)
-                    print(book_title.Title, "borrowed successfully by", self.member_name)
+                    print(book.Title, "borrowed successfully by", self.member_name)
                 else:
                     print("Sorry, this book is being borrowed by another member.")
 
