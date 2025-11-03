@@ -36,7 +36,5 @@ class Book:
         print("Description:", self.Description)
         print(self.Availability, "to borrow")
         print("Status in System:", self.Activation)
-    def borrowBook(self):
-        self.Availability="Unavailable"
-    def returnBook(self):
-        self.Availability="Available"
+
+
