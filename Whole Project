@@ -75,7 +75,7 @@ class Member:
             else:
                 if b.Availability == "Available":
                     b.Availability="Unavailable"
-                    self.booksborrowed.append(book_title)
+                    self.booksborrowed.append(book)
                     print(book.Title, "borrowed successfully by", self.member_name)
                 else:
                     print("Sorry, this book is being borrowed by another member.")
@@ -86,9 +86,6 @@ class Member:
             self.booksborrowed.remove(b)
         else:
             print("Sorry. You cannot return a book you have not borrowed")
-        book.Availability = "Not Available"
-        self.booksborrowed.append(book)
-        print(book.Title, "borrowed successfully by", self.member_name)
 
     def display_status(self):
         book_titles = [b.Title for b in self.booksborrowed]
