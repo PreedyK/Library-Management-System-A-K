@@ -9,6 +9,7 @@ class Book:
         self.Activation=""
         self.Description=""
         self.AuthorInfo=[]
+
     def addBook(self):
         self.BookID = input("Enter book ID:")
         self.Title = input("Enter the title:")
@@ -18,6 +19,7 @@ class Book:
         self.Description= input("Please enter the book Description")
         self.Availability="Available"
         self.Activation="Current"
+
     def editBook(self):
         self.BookID = input("Enter book ID:")
         self.Title = input("Enter the new title:")
@@ -63,12 +65,18 @@ class Member:
         else:
             print("Unsubscribe cancelled.")
 
-    def borrow_book(self, book_title):
+    def borrow_book(self, book):
         if self.status != "Active":
             print("Member", self.member_name, "is Inactive and cannot borrow books.")
+            return
+        if book.Availability != "Available": 
+            print(book.Title, "is not available right now.") 
+            return
 
+        book.Availability = "Not Available"
         self.booksborrowed.append(book_title)
         print(book_title, "borrowed successfully by", self.member_name)
 
     def display_status(self):
-        print("Member: ", self.member_name,"| Status: ", self.status, "| Books Borrowed: ", self.booksborrowed)
+        book_titles = [b.Title for b in self.booksborrowed]
+        print("Member: ", self.member_name,"| Status: ", self.status, "| Books Borrowed: ", book_titles)
