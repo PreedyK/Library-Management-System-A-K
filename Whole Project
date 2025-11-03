@@ -74,8 +74,8 @@ class Member:
             return
 
         book.Availability = "Not Available"
-        self.booksborrowed.append(book_title)
-        print(book_title, "borrowed successfully by", self.member_name)
+        self.booksborrowed.append(book)
+        print(book.Title, "borrowed successfully by", self.member_name)
 
     def display_status(self):
         book_titles = [b.Title for b in self.booksborrowed]
