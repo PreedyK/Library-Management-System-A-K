@@ -2,131 +2,29 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import *
 
-# ---------------------- APP CLASS (FRAME MANAGER) ---------------------- #
-class App(tk.Tk):
-    def __init__(self):
-        super().__init__()
 
-        self.title("Library Management System")
-        self.geometry("500x400")
-        self.frames = {}
-
-        #Pages
-        for F in (MainMenu, MemberMenu, BookMenu, AdminMenu):
-            frame = F(self)
-            self.frames[F] = frame
-            frame.place(x=0, y=0, width=50, height=400)
-
-        self.show_frame(MainMenu)
-
-    def show_frame(self, page):
-        frame = self.frames[page]
-        frame.tkraise()
-
-# ---------------------- MAIN MENU ---------------------- #
-class MainMenu(tk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        tk.Label(self, text="Library Management System", font=("Arial", 20)).pack(pady=20)
-
-        tk.Button(self, text="Members", width=20, height=2,
-                  command=lambda: master.show_frame(MemberMenu)).pack(pady=10)
-
-        tk.Button(self, text="Books", width=20, height=2,
-                  command=lambda: master.show_frame(BookMenu)).pack(pady=10)
-
-        tk.Button(self, text="Admin", width=20, height=2,
-                  command=lambda: master.show_frame(AdminMenu)).pack(pady=10)
-
-        tk.Button(self, text="Exit", width=20, height=2,
-                  command=master.destroy).pack(pady=10)
-
-# ---------------------- MEMBER MENU ---------------------- #
-class MemberMenu(tk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        tk.Label(self, text="Member Menu", font=("Arial", 18)).pack(pady=20)
-
-        tk.Button(self, text="Add Member", width=20).pack(pady=5)
-        tk.Button(self, text="Borrow Book", width=20).pack(pady=5)
-        tk.Button(self, text="Return Book", width=20).pack(pady=5)
-        tk.Button(self, text="View Member Status", width=20).pack(pady=5)
-
-        tk.Button(self, text="Back", width=20,
-                  command=lambda: master.show_frame(MainMenu)).pack(pady=20)
-
-# ---------------------- BOOK MENU ---------------------- #
-class BookMenu(tk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        tk.Label(self, text="Book Menu", font =("Arial",18)).pack(pady=20)
-
-        tk.Button(self, text="Add Book", width=20).pack(pady=5)
-        tk.Button(self, text="Edit Book", width=20).pack(pady=5)
-        tk.Button(self, text="Display Book", width=20).pack(pady=5)
-
-        tk.Button(self, text="Back", width=20,
-                  command=lambda: master.show_frame(MainMenu)).pack(pady=20)
-
-# ---------------------- ADMIN MENU ---------------------- #
-class AdminMenu(tk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        tk.Label(self, text="Admin Menu", font =("Arial",18)).pack(pady=20)
-
-        tk.Button(self, text="Add Admin", width=20).pack(pady=5)
-        tk.Button(self, text="Edit Admin", width=20).pack(pady=5)
-
-        tk.Button(self, text="Back", width=20,
-                  command=lambda: master.show_frame(MainMenu)).pack(pady=20)
-
-# ---------------------- RUN APP ---------------------- #
-app = App()
-app.mainloop()
-
-
-
-
-
-
-#Book Class ------------------------------------------------------------------
+#---------------------------BOOK CLASS-------------------------------
 class Book:
-    def addBook(self, a, p, bid, title, author, publisher, yop, description):
-        aid = a
-        pwd = p
-        logged_in = False
-        for admin in Admin.admins:
-            if admin.admin_id == aid and admin.password == pwd:
-                logged_in = True
-                self.BookID = bid
-                self.Title = title
-                self.AuthorID = author
-                self.Publisher = publisher
-                self.YoP = yop
-                self.Description = description
-                self.Availability = "Available"
-                self.Activation = "Current"
-                break
+    def __init__(self):
+        self.BookID=""
+        self.Title=""
+        self.AuthorID=""
+        self.Publisher=""
+        self.YoP=""
+        self.Availability=""
+        self.Activation=""
+        self.Description=""
+        self.AuthorInfo=[]
 
-    def editBook(self, a, p, bid, title, author, publisher, yop, description, activation):
-        aid = a
-        pwd = p
-        logged_in = False
-        for admin in Admin.admins:
-            if admin.admin_id == aid and admin.password == pwd:
-                logged_in = True
-                self.BookID = bid
-                self.Title = title
-                self.AuthorID = author
-                self.Publisher = publisher
-                self.YoP = yop
-                self.Description = description
-                self.Activation = activation
-                break
+    def addBook(self):
+        self.BookID = input("Enter book ID:")
+        self.Title = input("Enter the title:")
+        self.AuthorID = input("Enter the author:")
+        self.Publisher= input("Enter the publisher:")
+        self.YoP= input("Enter the year of publication:")
+        self.Description= input("Please enter the book Description")
+        self.Availability="Available"
+        self.Activation="Current"
 
     def editBook(self):
         self.BookID = input("Enter book ID:")
@@ -147,7 +45,7 @@ class Book:
         print(self.Availability, "to borrow")
         print("Status in System:", self.Activation)
 
-#Member Class -------------------------------------------------------------------
+#-------------------------------------Member Class -------------------------------------------
 class Member:
     def __init__(self):
         self.member_id = ""
@@ -199,7 +97,7 @@ class Member:
         book_titles = [b.Title for b in self.booksborrowed]
         print("Member: ", self.member_name,"| Status: ", self.status, "| Books Borrowed: ", book_titles)
 
-#Author Class -----------------------------------------------------------------------------------
+#----------------------------------Author Class --------------------------------------------------
 class Author:
     def __init__(self):
         self.authorID=""
@@ -220,7 +118,7 @@ class Author:
     def add_book(self, b):
         self.booksWritten.append(b)
 
-#Admin Class -------------------------------------------------------------------
+#------------------------------------------Admin Class ------------------------------------------------
 class Admin:
     def __init__(self):
         self.adminID=""
@@ -243,3 +141,132 @@ class Admin:
         self.position = input("Position:")
         self.password = input("Create Password:")
         self.email = input("Email:")
+
+
+# ---------------------- APP CLASS (FRAME MANAGER) ---------------------- #
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+
+        self.title("Library Management System")
+        self.geometry("500x400")
+        self.frames = {}
+
+        #Pages
+        for F in (MainMenu, MemberMenu, BookMenu, AdminMenu):
+            frame = F(self)
+            self.frames[F] = frame
+            frame.place(x=0, y=0, width=50, height=400)
+
+        self.show_frame(MainMenu)
+
+    def show_frame(self, page):
+        frame = self.frames[page]
+        frame.tkraise()
+
+# ---------------------- MAIN MENU ---------------------- #
+class MainMenu(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        tk.Label(self, text="Library Management System", font=("Arial", 20)).pack(pady=20)
+
+        btn_frame = tk.Frame(self)
+        btn_frame.pack(pady=10)
+
+        tk.Button(btn_frame, text="Members", width=20, height=2,
+                  command=lambda: master.show_frame(MemberMenu)).pack(pady=10)
+        tk.Button(btn_frame, text="Books", width=20, height=2,
+                  command=lambda: master.show_frame(BookMenu)).pack(pady=10)
+        tk.Button(btn_frame, text="Admin", width=20, height=2,
+                  command=lambda: master.show_frame(AdminMenu)).pack(pady=10)
+        tk.Button(btn_frame, text="Exit", width=20, height=2,
+                  command=master.destroy).pack(pady=10)
+
+# ---------------------- MEMBER MENU ---------------------- #
+class MemberMenu(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        tk.Label(self, text="Member Menu", font=("Arial", 18)).pack(pady=20)
+
+        controls = tk.Frame(self)
+        controls.pack()
+
+        tk.Button(controls, text="Add Member", width=20).pack(pady=5)
+        tk.Button(controls, text="Borrow Book", width=20).pack(pady=5)
+        tk.Button(controls, text="Return Book", width=20).pack(pady=5)
+        tk.Button(controls, text="View Member Status", width=20).pack(pady=5)
+
+        tk.Button(controls, text="Back", width=20,
+                  command=lambda: master.show_frame(MainMenu)).pack(pady=20)
+
+# ---------------------- BOOK MENU ---------------------- #
+class BookMenu(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        tk.Label(self, text="Book Menu", font =("Arial",18)).pack(pady=20)
+
+        tk.Button(self, text="Add Book", width=20).pack(pady=5)
+        tk.Button(self, text="Edit Book", width=20).pack(pady=5)
+        tk.Button(self, text="Display Book", width=20).pack(pady=5)
+
+        tk.Button(self, text="Back", width=20,
+                  command=lambda: master.show_frame(MainMenu)).pack(pady=20)
+
+# ---------------------- ADMIN MENU ---------------------- #
+class AdminMenu(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        tk.Label(self, text="Admin Menu", font =("Arial",18)).pack(pady=20)
+
+        tk.Button(self, text="Add Admin", width=20).pack(pady=5)
+        tk.Button(self, text="Edit Admin", width=20).pack(pady=5)
+
+        tk.Button(self, text="Back", width=20,
+                  command=lambda: master.show_frame(MainMenu)).pack(pady=20)
+
+# ---------------------- RUN APP ---------------------- #
+app = App()
+app.mainloop()
+#----------------------- MEMBER GUI ----------------------#
+class MemberGUI(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        tk.Label(self, text="Member Menu", font=("Arial", 18)).pack(pady=10)
+
+        tk.Button(self, text="Add Member", width=20,
+                  command=self.open_add_member).pack(pady=5)
+        tk.Button(self, text="Borrow Book", width=20,
+                  command=self.open_borrow_book).pack(pady=5)
+        tk.Button(self, text="Return Book", width=20,
+                  command=self.open_return_book).pack(pady=5)
+        tk.Button(self, text="View Status", width=20,
+                  command=self.show_status).pack(pady=5)
+        tk.Button(self, text="Back", width=20,
+                  command=lambda: master.show_frame(MainMenu)).pack(pady=20)
+
+        self.output = tk.Text(self, height=8, width=50)
+        self.output.pack(pady=10)
+
+    #------------------- MEMBER WINDOW -------------------------
+    def open_add_member(self):
+        win = Toplevel(self)
+        win.title("Add Member")
+
+        tk.Label(win, text="Member ID").pack()
+        id_entry = tk.Entry(win)
+        id_entry.pack()
+
+        tk.Label(win, text="Name").pack()
+        name_entry = tk.Entry(win)
+        name_entry.pack()
+
+        tk.Label(win, text="Library Card Number").pack()
+        card_entry = tk.Entry(win)
+        card_entry.pack()
+
+        tk.Label(win, text="Password").pack()
+        pass_entry = tk.Entry(win, show="*")
+        pass_entry.pack()
