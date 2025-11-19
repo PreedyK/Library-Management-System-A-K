@@ -95,26 +95,38 @@ app.mainloop()
 
 #Book Class ------------------------------------------------------------------
 class Book:
-    def __init__(self):
-        self.BookID=""
-        self.Title=""
-        self.AuthorID=""
-        self.Publisher=""
-        self.YoP=""
-        self.Availability=""
-        self.Activation=""
-        self.Description=""
-        self.AuthorInfo=[]
+    def addBook(self, a, p, bid, title, author, publisher, yop, description):
+        aid = a
+        pwd = p
+        logged_in = False
+        for admin in Admin.admins:
+            if admin.admin_id == aid and admin.password == pwd:
+                logged_in = True
+                self.BookID = bid
+                self.Title = title
+                self.AuthorID = author
+                self.Publisher = publisher
+                self.YoP = yop
+                self.Description = description
+                self.Availability = "Available"
+                self.Activation = "Current"
+                break
 
-    def addBook(self):
-        self.BookID = input("Enter book ID:")
-        self.Title = input("Enter the title:")
-        self.AuthorID = input("Enter the author:")
-        self.Publisher= input("Enter the publisher:")
-        self.YoP= input("Enter the year of publication:")
-        self.Description= input("Please enter the book Description")
-        self.Availability="Available"
-        self.Activation="Current"
+    def editBook(self, a, p, bid, title, author, publisher, yop, description, activation):
+        aid = a
+        pwd = p
+        logged_in = False
+        for admin in Admin.admins:
+            if admin.admin_id == aid and admin.password == pwd:
+                logged_in = True
+                self.BookID = bid
+                self.Title = title
+                self.AuthorID = author
+                self.Publisher = publisher
+                self.YoP = yop
+                self.Description = description
+                self.Activation = activation
+                break
 
     def editBook(self):
         self.BookID = input("Enter book ID:")
