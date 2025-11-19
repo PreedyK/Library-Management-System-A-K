@@ -1,33 +1,45 @@
 class Book:
     def __init__(self):
-        self.BookID=""
-        self.Title=""
-        self.AuthorID=""
-        self.Publisher=""
-        self.YoP=""
-        self.Availability=""
-        self.Activation=""
-        self.Description=""
-        self.AuthorInfo=[]
+        self.BookID = ""
+        self.Title = ""
+        self.AuthorID = ""
+        self.Publisher = ""
+        self.YoP = ""
+        self.Availability = ""
+        self.Activation = ""
+        self.Description = ""
+        self.AuthorInfo = []
 
     def addBook(self):
-        self.BookID = input("Enter book ID:")
-        self.Title = input("Enter the title:")
-        self.AuthorID = input("Enter the author:")
-        self.Publisher= input("Enter the publisher:")
-        self.YoP= input("Enter the year of publication:")
-        self.Description= input("Please enter the book Description")
-        self.Availability="Available"
-        self.Activation="Current"
+        aid = input("Admin ID:")
+        pwd = input("Password:")
+        if aid in Admin.admins and Admin.admins[aid] == pwd:
+            print("Access granted")
+            self.BookID = input("Enter book ID:")
+            self.Title = input("Enter the title:")
+            self.AuthorID = input("Enter the author:")
+            self.Publisher = input("Enter the publisher:")
+            self.YoP = input("Enter the year of publication:")
+            self.Description = input("Please enter the book Description")
+            self.Availability = "Available"
+            self.Activation = "Current"
+        else:
+            print("Invalid admin credentials")
 
     def editBook(self):
-        self.BookID = input("Enter book ID:")
-        self.Title = input("Enter the new title:")
-        self.AuthorID = input("Enter the new author:")
-        self.Publisher = input("Enter the new publisher:")
-        self.YoP = input("Enter the new year of publication:")
-        self.Description = input("Please enter the new book description")
-        self.Activation = input("Please enter whether the book is 'Current' or 'Previous'")
+        aid = input("Admin ID:")
+        pwd = input("Password:")
+        if aid in Admin.admins and Admin.admins[aid] == pwd:
+            print("Access granted")
+            self.BookID = input("Enter book ID:")
+            self.Title = input("Enter the title:")
+            self.AuthorID = input("Enter the author:")
+            self.Publisher = input("Enter the publisher:")
+            self.YoP = input("Enter the year of publication:")
+            self.Description = input("Please enter the book Description")
+            self.Activation = input("Please enter whether the book is 'Current' or 'Previous'")
+        else:
+            print("Invalid admin credentials")
 
     def displayBook(self):
         print("Book ID:", self.BookID)
@@ -38,6 +50,7 @@ class Book:
         print("Description:", self.Description)
         print(self.Availability, "to borrow")
         print("Status in System:", self.Activation)
+
 
 class Member:
     def __init__(self):
@@ -69,11 +82,11 @@ class Member:
             print("Member", self.member_name, "is Inactive and cannot borrow books.")
             return
         else:
-            if b.Activation != "Current:
+            if book.Activation != "Current":
                 print("Sorry, this book is not current in the system")
             else:
-                if b.Availability == "Available":
-                    b.Availability="Unavailable"
+                if book.Availability == "Available":
+                    book.Availability = "Unavailable"
                     self.booksborrowed.append(book)
                     print(book.Title, "borrowed successfully by", self.member_name)
                 else:
@@ -81,42 +94,45 @@ class Member:
 
     def return_book(self, b):
         if b in self.booksborrowed:
-            b.Availability="Available"
+            b.Availability = "Available"
             self.booksborrowed.remove(b)
         else:
             print("Sorry. You cannot return a book you have not borrowed")
 
     def display_status(self):
         book_titles = [b.Title for b in self.booksborrowed]
-        print("Member: ", self.member_name,"| Status: ", self.status, "| Books Borrowed: ", book_titles)
+        print("Member: ", self.member_name, "| Status: ", self.status, "| Books Borrowed: ", book_titles)
+
 
 class Author:
     def __init__(self):
-        self.authorID=""
-        self.authorName=""
-        self.country=""
-        self.booksWritten=[]
+        self.authorID = ""
+        self.authorName = ""
+        self.country = ""
+        self.booksWritten = []
 
     def add_author(self):
-        self.authorID=input("Author ID:")
-        self.authorName=input("Author Name:")
-        self.country=input("Country:")
+        self.authorID = input("Author ID:")
+        self.authorName = input("Author Name:")
+        self.country = input("Country:")
 
     def edit_author(self):
-        self.authorID=input("Author ID:")
-        self.authorName=input("Author Name:")
-        self.country=input("Country:")
+        self.authorID = input("Author ID:")
+        self.authorName = input("Author Name:")
+        self.country = input("Country:")
 
     def add_book(self, b):
         self.booksWritten.append(b)
+
+
 class Admin:
     def __init__(self):
-        self.adminID=""
-        self.name=""
-        self.position=""
-        self.password=""
-        self.email=""
-        self.booksAdded=[]
+        self.adminID = ""
+        self.name = ""
+        self.position = ""
+        self.password = ""
+        self.email = ""
+        self.booksAdded = []
 
     def add_admin(self):
         self.adminID = input("Admin ID:")
