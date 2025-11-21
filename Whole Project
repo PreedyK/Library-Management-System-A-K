@@ -8,7 +8,7 @@ class Book:
     def __init__(self):
         self.BookID=""
         self.Title=""
-        self.AuthorID=""
+        self.Author=""
         self.Publisher=""
         self.YoP=""
         self.Availability=""
@@ -16,15 +16,36 @@ class Book:
         self.Description=""
         self.AuthorInfo=[]
 
-    def addBook(self):
-        self.BookID = input("Enter book ID:")
-        self.Title = input("Enter the title:")
-        self.AuthorID = input("Enter the author:")
-        self.Publisher= input("Enter the publisher:")
-        self.YoP= input("Enter the year of publication:")
-        self.Description= input("Please enter the book Description")
-        self.Availability="Available"
-        self.Activation="Current"
+    def addBook(self, parent):
+        win = tk.Toplevel(parent)
+        win.title("Add Book")
+        win.geometry("400x400")
+
+        labels = ["Book ID", "Title", "Author", "Publisher",
+                  "Year of Publication", "Description"]
+
+        entries = {}
+
+        for i, text in enumerate(labels):
+            tk.Label(win, text=text).place(x=30, y=30 + i * 50)
+            entry = tk.Entry(win, width=30)
+            entry.place(x=150, y=30 + i * 50)
+            entries[text] = entry
+        def save_book():
+            self.BookID = entries["Book ID"].get()
+            self.Title = entries["Title"].get()
+            self.Author = entries["Author"].get()
+            self.Publisher= entries["Publisher"].get()
+            self.YoP= entries["Year of Publication"].get()
+            self.Description= entries["Description"].get()
+            self.Availability="Available"
+            self.Activation="Current"
+            messagebox.showinfo("Success", f"Book '{self.Title}' added!")
+
+            win.destroy()
+
+        tk.Button(win, text="Save Book", width=15,
+              command=save_book).place(x=150, y=330)
 
     def editBook(self):
         self.BookID = input("Enter book ID:")
@@ -156,7 +177,7 @@ class App(tk.Tk):
         for F in (MainMenu, MemberMenu, BookMenu, AdminMenu):
             frame = F(self)
             self.frames[F] = frame
-            frame.place(x=0, y=0, width=50, height=400)
+            frame.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.show_frame(MainMenu)
 
@@ -203,15 +224,19 @@ class MemberMenu(tk.Frame):
 class BookMenu(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
+        self.book = Book()
 
         tk.Label(self, text="Book Menu", font =("Arial",18)).pack(pady=20)
 
-        tk.Button(self, text="Add Book", width=20).pack(pady=5)
+        tk.Button(self, text="Add Book", width=20, command=self.addBook).pack(pady=5)
         tk.Button(self, text="Edit Book", width=20).pack(pady=5)
         tk.Button(self, text="Display Book", width=20).pack(pady=5)
 
         tk.Button(self, text="Back", width=20,
                   command=lambda: master.show_frame(MainMenu)).pack(pady=20)
+
+    def addBook(self):
+        self.book.addBook(self)
 
 # ---------------------- ADMIN MENU ---------------------- #
 class AdminMenu(tk.Frame):
@@ -226,9 +251,6 @@ class AdminMenu(tk.Frame):
         tk.Button(self, text="Back", width=20,
                   command=lambda: master.show_frame(MainMenu)).pack(pady=20)
 
-# ---------------------- RUN APP ---------------------- #
-app = App()
-app.mainloop()
 #----------------------- MEMBER GUI ----------------------#
 class MemberGUI(tk.Frame):
     def __init__(self, master):
@@ -270,3 +292,6 @@ class MemberGUI(tk.Frame):
         tk.Label(win, text="Password").pack()
         pass_entry = tk.Entry(win, show="*")
         pass_entry.pack()
+# ---------------------- RUN APP ---------------------- #
+app = App()
+app.mainloop()
