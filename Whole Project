@@ -176,7 +176,7 @@ class Member:
                 book.Availability = "Unavailable"
                 self.booksborrowed.append(book)
                 messagebox.showinfo("Success",
-                                     f"{book.Title}successfully borrowed.")
+                                     f"{book.Title} successfully borrowed.")
                 win.destroy()
             else:
                 messagebox.showerror("Error",
@@ -318,7 +318,7 @@ class Admin:
 
     def edit_admin(self, parent):
         win = tk.Toplevel(parent)
-        win.title("Add Admin")
+        win.title("Edit Admin")
         win.geometry("350x300")
 
         labels = ["Admin ID", "Name", "Position", "Password", "Email"]
@@ -410,7 +410,7 @@ class MemberMenu(tk.Frame):
     def unsubscribeMember(self):
         self.member.unsubscribe_member(self)
     def borrowBook(self):
-        self.member.borrowBook(self)
+        self.member.borrowBook(self, self.master.book_list)
     def returnBook(self):
         self.member.returnBook(self)
     def vMS(self):
@@ -426,15 +426,17 @@ class BookMenu(tk.Frame):
 
         tk.Button(self, text="Add Book", width=20, command=self.addBook).pack(pady=5)
         tk.Button(self, text="Edit Book", width=20, command=lambda: self.book.editBook(self)).pack(pady=5)
-        tk.Button(self, text="Display Book", width=20, command = lambda:self.book.displayBook(self)).pack(pady=5)
+        tk.Button(self, text="Display Book", width=20, command = self.book.displayBook).pack(pady=5)
 
         tk.Button(self, text="Back", width=20,
                   command=lambda: master.show_frame(MainMenu)).pack(pady=20)
 
     def addBook(self):
-        self.book.addBook(self)
-        master.master.book_list.append(self.book)
-        self.member.borrowBook((self, self.master.book_list))
+        newBook = Book()
+        newBook.addBook(self)
+        self.master.book_list.append(newBook)
+        self.book = newBook
+
 # ---------------------- AUTHOR MENU ---------------------- #
 class AuthorMenu(tk.Frame):
     def __init__(self, master):
@@ -445,7 +447,7 @@ class AuthorMenu(tk.Frame):
 
         tk.Button(self, text="Add Author", width=20, command=self.addAuthor).pack(pady=5)
         tk.Button(self, text="Edit Author", width=20, command=lambda: self.author.edit_author(self)).pack(pady=5)
-        tk.Button(self, text="Add Book to Author", width=20).pack(pady=5)
+        tk.Button(self, text="Add Book to Author", width=20, command=lambda: self.author.add_book(self)).pack(pady=5)
 
         tk.Button(self, text="Back", width=20,
                   command=lambda: master.show_frame(MainMenu)).pack(pady=20)
