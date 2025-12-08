@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import messagebox
-from tkinter import *
 
 
 #---------------------------BOOK CLASS-------------------------------
@@ -130,7 +129,7 @@ class Member:
         win.title("Unsubscribe Member")
         win.geometry("300x150")
 
-        tk.Label(win, text="Unsubscribe"+self.member_name).pack(pady=20)
+        tk.Label(win, text=f"Unsubscribe {self.member_name}").pack(pady=20)
 
         def confirm():
             self.status = "Inactive"
@@ -165,7 +164,7 @@ class Member:
             # run borrowing logic
             if self.status != "Active":
                 messagebox.showerror("Error",
-                                     "Member", self.member_name, "is inactive and cannot borrow books.")
+                                     f"Member {self.member_name} is inactive and cannot borrow books.")
                 return
 
             if book.Activation != "Current":
@@ -177,11 +176,11 @@ class Member:
                 book.Availability = "Unavailable"
                 self.booksborrowed.append(book)
                 messagebox.showinfo("Success",
-                                     f"{book.title}successfully borrowed.")
+                                     f"{book.Title}successfully borrowed.")
                 win.destroy()
             else:
                 messagebox.showerror("Error",
-                                     "This book is already borrowed by another member.")
+                                     f"This book is already borrowed by another member.")
 
         tk.Button(win, text="Borrow", command=do_borrow).pack(pady=15)
 
@@ -255,7 +254,7 @@ class Author:
 
     def edit_author(self, parent):
         win = tk.Toplevel(parent)
-        win.title("Add Author")
+        win.title("Edit Author")
         win.geometry("350x250")
 
         labels = ["Author ID", "Author Name", "Country"]
@@ -354,9 +353,10 @@ class App(tk.Tk):
         self.title("Library Management System")
         self.geometry("500x400")
         self.frames = {}
+        self.book_list=[]
 
         #Pages
-        for F in (MainMenu, MemberMenu, BookMenu, AdminMenu):
+        for F in (MainMenu, MemberMenu, BookMenu, AdminMenu, AuthorMenu):
             frame = F(self)
             self.frames[F] = frame
             frame.place(x=0, y=0, relwidth=1, relheight=1)
@@ -426,13 +426,15 @@ class BookMenu(tk.Frame):
 
         tk.Button(self, text="Add Book", width=20, command=self.addBook).pack(pady=5)
         tk.Button(self, text="Edit Book", width=20, command=lambda: self.book.editBook(self)).pack(pady=5)
-        tk.Button(self, text="Display Book", width=20).pack(pady=5)
+        tk.Button(self, text="Display Book", width=20, command = lambda:self.book.displayBook(self)).pack(pady=5)
 
         tk.Button(self, text="Back", width=20,
                   command=lambda: master.show_frame(MainMenu)).pack(pady=20)
 
     def addBook(self):
         self.book.addBook(self)
+        master.master.book_list.append(self.book)
+        self.member.borrowBook((self, self.master.book_list))
 # ---------------------- AUTHOR MENU ---------------------- #
 class AuthorMenu(tk.Frame):
     def __init__(self, master):
