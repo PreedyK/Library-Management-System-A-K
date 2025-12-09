@@ -1,4 +1,3 @@
-#=====GLOBAL STORAGE=====
 all_members = []
 all_books = []
 all_admins = []
@@ -7,48 +6,22 @@ all_authors = []
 import tkinter as tk
 from tkinter import messagebox
 
-# --------------------------- BOOK CLASS -------------------------------
+# --------------------------- DATA CLASSES -------------------------------
 class Book:
     def __init__(self):
         self.BookID = ""
         self.Title = ""
-        self.AuthorID = ""
+        self.Author = ""
         self.Publisher = ""
         self.YoP = ""
-        self.Availability = "Available"
-        self.Activation = "Current"
+        self.Availability = "Available"  # auto-managed
+        self.Activation = "Current"      # Current / Previous
         self.Description = ""
+        self.AuthorInfo = []
 
-    def addBook(self):
-        self.BookID = input("Enter book ID:")
-        self.Title = input("Enter the title:")
-        self.AuthorID = input("Enter the author:")
-        self.Publisher = input("Enter the publisher:")
-        self.YoP = input("Enter the year of publication:")
-        self.Description = input("Please enter the book Description")
-        self.Availability = "Available"
-        self.Activation = "Current"
+    def display_str(self):
+        return f"{self.Title} — {self.Author} (ID:{self.BookID})"
 
-    def editBook(self):
-        self.BookID = input("Enter book ID:")
-        self.Title = input("Enter the new title:")
-        self.AuthorID = input("Enter the new author:")
-        self.Publisher = input("Enter the new publisher:")
-        self.YoP = input("Enter the new year of publication:")
-        self.Description = input("Please enter the new book description")
-        self.Activation = input("Please enter whether the book is 'Current' or 'Previous'")
-
-    def displayBook(self):
-        print("Book ID:", self.BookID)
-        print("Title:", self.Title)
-        print("Author:", self.AuthorID)
-        print("Publisher:", self.Publisher)
-        print("Year of Publication:", self.YoP)
-        print("Description:", self.Description)
-        print(self.Availability, "to borrow")
-        print("Status in System:", self.Activation)
-
-# ------------------------------------- MEMBER CLASS -------------------------------------------
 class Member:
     def __init__(self):
         self.member_id = ""
@@ -61,13 +34,10 @@ class Member:
     def borrow_book(self, book):
         if self.status != "Active":
             return "Inactive"
-
         if book.Activation != "Current":
             return "NotCurrent"
-
         if book.Availability != "Available":
             return "Unavailable"
-
         book.Availability = "Unavailable"
         self.booksborrowed.append(book)
         return "Success"
@@ -79,7 +49,9 @@ class Member:
             return True
         return False
 
-# ---------------------------------- AUTHOR CLASS --------------------------------------------------
+    def display_str(self):
+        return f"{self.member_name} (ID:{self.member_id})"
+
 class Author:
     def __init__(self):
         self.authorID = ""
@@ -87,7 +59,9 @@ class Author:
         self.country = ""
         self.booksWritten = []
 
-# ------------------------------------------ ADMIN CLASS ------------------------------------------------
+    def display_str(self):
+        return f"{self.authorName} (ID:{self.authorID})"
+
 class Admin:
     def __init__(self):
         self.adminID = ""
@@ -95,203 +69,563 @@ class Admin:
         self.position = ""
         self.password = ""
         self.email = ""
-        self.booksAdded = []
 
-# ---------------------- APP CLASS (FRAME MANAGER) ---------------------- #
+    def display_str(self):
+        return f"{self.name} (ID:{self.adminID})"
+
+# ---------------------- APP (frame manager) ---------------------- #
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-
         self.title("Library Management System")
-        self.geometry("500x400")
+        self.geometry("560x460")
         self.frames = {}
 
-        # Pages
-        for F in (MainMenu, MemberMenu, BookMenu, AdminMenu):
+        for F in (MainMenu, MemberMenu, BookMenu, AuthorMenu, AdminMenu):
             frame = F(self)
             self.frames[F] = frame
-            frame.place(x=0, y=0, width=500, height=400)
+            frame.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.show_frame(MainMenu)
 
     def show_frame(self, page):
         frame = self.frames[page]
+        if hasattr(frame, "refresh_all"):
+            frame.refresh_all()
         frame.tkraise()
 
 # ---------------------- MAIN MENU ---------------------- #
 class MainMenu(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
-        tk.Label(self, text="Library Management System", font=("Arial", 20)).pack(pady=20)
+        tk.Label(self, text="Library Management System", font=("Arial", 22)).pack(pady=20)
 
-        tk.Button(self, text="Members", width=20, height=2,
-                  command=lambda: master.show_frame(MemberMenu)).pack(pady=5)
-        tk.Button(self, text="Books", width=20, height=2,
-                  command=lambda: master.show_frame(BookMenu)).pack(pady=5)
-        tk.Button(self, text="Admin", width=20, height=2,
-                  command=lambda: master.show_frame(AdminMenu)).pack(pady=5)
-        tk.Button(self, text="Exit", width=20, height=2,
-                  command=master.destroy).pack(pady=5)
+        btn_frame = tk.Frame(self)
+        btn_frame.pack(pady=10)
+
+        tk.Button(btn_frame, text="Members", width=18, height=2,
+                  command=lambda: master.show_frame(MemberMenu)).pack(pady=6)
+        tk.Button(btn_frame, text="Books", width=18, height=2,
+                  command=lambda: master.show_frame(BookMenu)).pack(pady=6)
+        tk.Button(btn_frame, text="Authors", width=18, height=2,
+                  command=lambda: master.show_frame(AuthorMenu)).pack(pady=6)
+        tk.Button(btn_frame, text="Admins", width=18, height=2,
+                  command=lambda: master.show_frame(AdminMenu)).pack(pady=6)
+        tk.Button(self, text="Exit", width=18, height=2, command=master.destroy).pack(pady=10)
 
 # ---------------------- MEMBER MENU ---------------------- #
 class MemberMenu(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
+        self.master = master
+        tk.Label(self, text="Member Menu", font=("Arial", 18)).pack(pady=12)
 
-        tk.Label(self, text="Member Menu", font=("Arial", 18)).pack(pady=20)
+        tk.Button(self, text="Add Member", width=20, command=self.open_add_member).pack(pady=5)
+        tk.Button(self, text="Borrow Book", width=20, command=self.open_borrow_win).pack(pady=5)
+        tk.Button(self, text="Return Book", width=20, command=self.open_return_win).pack(pady=5)
+        tk.Button(self, text="View Status of Members", width=20, command=self.show_status).pack(pady=5)
+        tk.Button(self, text="Back", width=20, command=lambda: master.show_frame(MainMenu)).pack(pady=12)
 
-        tk.Button(self, text="Add Member", width=20,
-                  command=self.open_add_member).pack(pady=5)
-        tk.Button(self, text="Borrow Book", width=20,
-                  command=self.open_borrow_win).pack(pady=5)
-        tk.Button(self, text="Return Book", width=20,
-                  command=self.open_return_win).pack(pady=5)
-        tk.Button(self, text="View Member Status", width=20,
-                  command=self.show_status).pack(pady=5)
-
-        tk.Button(self, text="Back", width=20,
-                  command=lambda: master.show_frame(MainMenu)).pack(pady=20)
-
-    # ------------------- ADD MEMBER WINDOW -------------------------
     def open_add_member(self):
         win = tk.Toplevel(self)
         win.title("Add Member")
-
         tk.Label(win, text="Member ID").pack()
         id_entry = tk.Entry(win); id_entry.pack()
-
         tk.Label(win, text="Name").pack()
         name_entry = tk.Entry(win); name_entry.pack()
-
         tk.Label(win, text="Library Card Number").pack()
         card_entry = tk.Entry(win); card_entry.pack()
-
         tk.Label(win, text="Password").pack()
         pass_entry = tk.Entry(win, show="*"); pass_entry.pack()
 
         def save_member():
+            mid = id_entry.get().strip()
+            name = name_entry.get().strip()
+            if not mid or not name:
+                messagebox.showerror("Error", "Member ID and Name are required.")
+                return
+            if any(m.member_id == mid for m in all_members):
+                messagebox.showerror("Error", "Member ID exists.")
+                return
             m = Member()
-            m.member_id = id_entry.get()
-            m.member_name = name_entry.get()
-            m.libCardnumber = card_entry.get()
-            m.password = pass_entry.get()
-
+            m.member_id = mid
+            m.member_name = name
+            m.libCardnumber = card_entry.get().strip()
+            m.password = pass_entry.get().strip()
+            m.status = "Active"
             all_members.append(m)
             messagebox.showinfo("Success", f"Member '{m.member_name}' added!")
             win.destroy()
 
         tk.Button(win, text="Save", command=save_member).pack(pady=10)
 
-    # ------------------- BORROW BOOK WINDOW -------------------------
     def open_borrow_win(self):
+        if not all_members:
+            messagebox.showerror("Error", "No members in the system.")
+            return
+        if not all_books:
+            messagebox.showerror("Error", "No books in the system.")
+            return
+
         win = tk.Toplevel(self)
         win.title("Borrow Book")
 
-        tk.Label(win, text="Member Name").pack()
-        member_entry = tk.Entry(win); member_entry.pack()
+        tk.Label(win, text="Select Member").pack()
+        mem_lb = tk.Listbox(win, width=60, height=6, exportselection=0); mem_lb.pack()
+        for m in all_members:
+            mem_lb.insert(tk.END, m.display_str())
 
-        tk.Label(win, text="Book Title").pack()
-        book_entry = tk.Entry(win); book_entry.pack()
+        tk.Label(win, text="Available Books").pack()
+        book_lb = tk.Listbox(win, width=60, height=10, exportselection=0); book_lb.pack()
+        available = [b for b in all_books if b.Availability == "Available" and b.Activation == "Current"]
+        for b in available:
+            book_lb.insert(tk.END, b.display_str())
 
-        def borrow():
-            name = member_entry.get()
-            title = book_entry.get()
-
-            m = next((x for x in all_members if x.member_name == name), None)
-            b = next((x for x in all_books if x.Title == title), None)
-
-            if not m:
-                messagebox.showerror("Error", "Member not found.")
+        def do_borrow():
+            selm = mem_lb.curselection()
+            selb = book_lb.curselection()
+            if not selm:
+                messagebox.showerror("Error", "Select a member.")
                 return
-            if not b:
-                messagebox.showerror("Error", "Book not found.")
+            if not selb:
+                messagebox.showerror("Error", "Select a book.")
                 return
-
-            result = m.borrow_book(b)
+            member = all_members[selm[0]]
+            book = available[selb[0]]
+            result = member.borrow_book(book)
             if result == "Success":
-                messagebox.showinfo("Success", f"{name} borrowed '{title}'")
+                messagebox.showinfo("Success", f"{member.member_name} borrowed '{book.Title}'")
                 win.destroy()
             elif result == "Unavailable":
                 messagebox.showerror("Error", "Book is currently borrowed.")
             elif result == "NotCurrent":
-                messagebox.showerror("Error", "Book is not active in system.")
+                messagebox.showerror("Error", "Book is not active.")
             else:
                 messagebox.showerror("Error", "Member is inactive.")
 
-        tk.Button(win, text="Borrow", width=20, command=borrow).pack(pady=10)
+        tk.Button(win, text="Borrow", width=18, command=do_borrow).pack(pady=8)
 
-    # ------------------- RETURN BOOK WINDOW -------------------------
     def open_return_win(self):
+        if not all_members:
+            messagebox.showerror("Error", "No members in the system.")
+            return
+
         win = tk.Toplevel(self)
         win.title("Return Book")
 
-        tk.Label(win, text="Member Name").pack()
-        member_entry = tk.Entry(win); member_entry.pack()
+        tk.Label(win, text="Select Member").pack()
+        mem_lb = tk.Listbox(win, width=60, height=6, exportselection=0); mem_lb.pack()
+        for m in all_members:
+            mem_lb.insert(tk.END, m.display_str())
 
-        tk.Label(win, text="Book Title").pack()
-        book_entry = tk.Entry(win); book_entry.pack()
+        tk.Label(win, text="Borrowed Books (select one)").pack()
+        book_lb = tk.Listbox(win, width=60, height=10, exportselection=0); book_lb.pack()
 
-        def return_book():
-            name = member_entry.get()
-            title = book_entry.get()
-
-            m = next((x for x in all_members if x.member_name == name), None)
-            if not m:
-                messagebox.showerror("Error", "Member not found.")
+        def on_mem_sel(evt=None):
+            book_lb.delete(0, tk.END)
+            sel = mem_lb.curselection()
+            if not sel:
                 return
+            member = all_members[sel[0]]
+            for b in member.booksborrowed:
+                book_lb.insert(tk.END, b.display_str())
 
-            book = next((x for x in m.booksborrowed if x.Title == title), None)
+        mem_lb.bind("<<ListboxSelect>>", lambda e: on_mem_sel())
 
-            if not book:
-                messagebox.showerror("Error", "Member did not borrow this book.")
+        def do_return():
+            selm = mem_lb.curselection()
+            selb = book_lb.curselection()
+            if not selm:
+                messagebox.showerror("Error", "Select a member.")
                 return
-
-            m.return_book(book)
-            messagebox.showinfo("Success", f"{name} returned '{title}'")
+            if not selb:
+                messagebox.showerror("Error", "Select a book to return.")
+                return
+            member = all_members[selm[0]]
+            book = member.booksborrowed[selb[0]]
+            member.return_book(book)
+            messagebox.showinfo("Success", f"'{book.Title}' returned.")
             win.destroy()
 
-        tk.Button(win, text="Return", command=return_book).pack(pady=10)
+        tk.Button(win, text="Return", width=18, command=do_return).pack(pady=8)
 
-    # ------------------- VIEW STATUS -------------------------
     def show_status(self):
         if not all_members:
             messagebox.showinfo("Members", "No members in system.")
             return
-
         info = ""
         for m in all_members:
             borrowed_titles = ", ".join([b.Title for b in m.booksborrowed]) or "None"
             info += f"{m.member_name} | Status: {m.status} | Books: {borrowed_titles}\n"
-
         messagebox.showinfo("Member Status", info)
 
-# ---------------------- BOOK MENU (unchanged) ---------------------- #
+# ---------------------- BOOK MENU (pack-based popups) ---------------------- #
 class BookMenu(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
+        self.master = master
+        tk.Label(self, text="Book Menu", font=("Arial", 18)).pack(pady=12)
 
-        tk.Label(self, text="Book Menu", font=("Arial", 18)).pack(pady=20)
+        tk.Button(self, text="Add Book", width=20, command=self.open_add_book).pack(pady=5)
+        tk.Button(self, text="Edit Book", width=20, command=self.open_choose_edit_book).pack(pady=5)
+        tk.Button(self, text="Display Books", width=20, command=self.display_books).pack(pady=5)
+        tk.Button(self, text="Back", width=20, command=lambda: master.show_frame(MainMenu)).pack(pady=12)
 
-        tk.Button(self, text="Add Book", width=20).pack(pady=5)
-        tk.Button(self, text="Edit Book", width=20).pack(pady=5)
-        tk.Button(self, text="Display Book", width=20).pack(pady=5)
+    def open_add_book(self):
+        win = tk.Toplevel(self)
+        win.title("Add Book")
 
-        tk.Button(self, text="Back", width=20,
-                  command=lambda: master.show_frame(MainMenu)).pack(pady=20)
+        tk.Label(win, text="Book ID").pack()
+        id_entry = tk.Entry(win); id_entry.pack()
+        tk.Label(win, text="Title").pack()
+        title_entry = tk.Entry(win); title_entry.pack()
+        tk.Label(win, text="Author").pack()
+        author_entry = tk.Entry(win); author_entry.pack()
+        tk.Label(win, text="Publisher").pack()
+        pub_entry = tk.Entry(win); pub_entry.pack()
+        tk.Label(win, text="Year of Publication").pack()
+        yop_entry = tk.Entry(win); yop_entry.pack()
+        tk.Label(win, text="Description").pack()
+        desc_entry = tk.Entry(win); desc_entry.pack()
+        tk.Label(win, text="Activation (Current/Previous)").pack()
+        activation_var = tk.StringVar(win); activation_var.set("Current")
+        activation_menu = tk.OptionMenu(win, activation_var, "Current", "Previous")
+        activation_menu.pack()
 
-# ---------------------- ADMIN MENU (unchanged) ---------------------- #
+        def save_book():
+            bid = id_entry.get().strip()
+            title = title_entry.get().strip()
+            author = author_entry.get().strip()
+            if not bid or not title or not author:
+                messagebox.showerror("Error", "Book ID, Title and Author are required.")
+                return
+            if any(b.BookID == bid for b in all_books):
+                messagebox.showerror("Error", "Book ID already exists.")
+                return
+            b = Book()
+            b.BookID = bid
+            b.Title = title
+            b.Author = author
+            b.Publisher = pub_entry.get().strip()
+            b.YoP = yop_entry.get().strip()
+            b.Description = desc_entry.get().strip()
+            b.Activation = activation_var.get()
+            b.Availability = "Available"
+            all_books.append(b)
+            messagebox.showinfo("Success", f"Book '{b.Title}' added.")
+            win.destroy()
+
+        tk.Button(win, text="Save Book", command=save_book).pack(pady=10)
+
+    def open_choose_edit_book(self):
+        if not all_books:
+            messagebox.showerror("Error", "No books in system.")
+            return
+        win = tk.Toplevel(self)
+        win.title("Choose Book to Edit")
+        tk.Label(win, text="Select Book to Edit").pack(pady=6)
+        lb = tk.Listbox(win, width=70, height=12); lb.pack()
+        for b in all_books:
+            lb.insert(tk.END, b.display_str())
+
+        def open_editor():
+            sel = lb.curselection()
+            if not sel:
+                messagebox.showerror("Error", "Select a book.")
+                return
+            book = all_books[sel[0]]
+            win.destroy()
+            self.open_edit_book(book)
+
+        tk.Button(win, text="Edit Selected", command=open_editor).pack(pady=8)
+
+    def open_edit_book(self, book):
+        win = tk.Toplevel(self)
+        win.title("Edit Book")
+
+        tk.Label(win, text="Book ID (not editable)").pack()
+        id_entry = tk.Entry(win); id_entry.pack()
+        id_entry.insert(0, book.BookID)
+        id_entry.config(state="disabled")
+
+        tk.Label(win, text="Title").pack()
+        title_entry = tk.Entry(win); title_entry.pack()
+        title_entry.insert(0, book.Title)
+
+        tk.Label(win, text="Author").pack()
+        author_entry = tk.Entry(win); author_entry.pack()
+        author_entry.insert(0, book.Author)
+
+        tk.Label(win, text="Publisher").pack()
+        pub_entry = tk.Entry(win); pub_entry.pack()
+        pub_entry.insert(0, book.Publisher)
+
+        tk.Label(win, text="Year of Publication").pack()
+        yop_entry = tk.Entry(win); yop_entry.pack()
+        yop_entry.insert(0, book.YoP)
+
+        tk.Label(win, text="Description").pack()
+        desc_entry = tk.Entry(win); desc_entry.pack()
+        desc_entry.insert(0, book.Description)
+
+        tk.Label(win, text="Activation (Current/Previous)").pack()
+        activation_var = tk.StringVar(win); activation_var.set(book.Activation)
+        activation_menu = tk.OptionMenu(win, activation_var, "Current", "Previous")
+        activation_menu.pack()
+
+        def save_changes():
+            title = title_entry.get().strip()
+            author = author_entry.get().strip()
+            if not title or not author:
+                messagebox.showerror("Error", "Title and Author are required.")
+                return
+            book.Title = title
+            book.Author = author
+            book.Publisher = pub_entry.get().strip()
+            book.YoP = yop_entry.get().strip()
+            book.Description = desc_entry.get().strip()
+            book.Activation = activation_var.get()
+            messagebox.showinfo("Success", "Book updated.")
+            win.destroy()
+
+        tk.Button(win, text="Save Changes", command=save_changes).pack(pady=10)
+
+    def display_books(self):
+        if not all_books:
+            messagebox.showinfo("Books", "No books in system.")
+            return
+        win = tk.Toplevel(self)
+        win.title("All Books")
+        txt = tk.Text(win, width=80, height=20)
+        txt.pack(padx=6, pady=6)
+        for b in all_books:
+            txt.insert(tk.END, f"ID:{b.BookID} | {b.Title} | Author: {b.Author} | Status: {b.Activation} | Availability: {b.Availability}\n")
+        txt.config(state="disabled")
+
+# ---------------------- AUTHOR MENU ---------------------- #
+class AuthorMenu(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.master = master
+        tk.Label(self, text="Author Menu", font=("Arial", 18)).pack(pady=12)
+
+        tk.Button(self, text="Add Author", width=20, command=self.open_add_author).pack(pady=5)
+        tk.Button(self, text="Edit Author", width=20, command=self.open_choose_edit_author).pack(pady=5)
+        tk.Button(self, text="Assign Book to Author", width=20, command=self.open_assign_book).pack(pady=5)
+        tk.Button(self, text="Back", width=20, command=lambda: master.show_frame(MainMenu)).pack(pady=12)
+
+    def open_add_author(self):
+        win = tk.Toplevel(self)
+        win.title("Add Author")
+        tk.Label(win, text="Author ID").pack()
+        id_entry = tk.Entry(win); id_entry.pack()
+        tk.Label(win, text="Author Name").pack()
+        name_entry = tk.Entry(win); name_entry.pack()
+        tk.Label(win, text="Country").pack()
+        country_entry = tk.Entry(win); country_entry.pack()
+
+        def save():
+            aid = id_entry.get().strip()
+            name = name_entry.get().strip()
+            if not aid or not name:
+                messagebox.showerror("Error", "Author ID and Name required.")
+                return
+            if any(a.authorID == aid for a in all_authors):
+                messagebox.showerror("Error", "Author ID exists.")
+                return
+            a = Author()
+            a.authorID = aid
+            a.authorName = name
+            a.country = country_entry.get().strip()
+            all_authors.append(a)
+            messagebox.showinfo("Success", f"Author '{a.authorName}' added.")
+            win.destroy()
+
+        tk.Button(win, text="Save", command=save).pack(pady=10)
+
+    def open_choose_edit_author(self):
+        if not all_authors:
+            messagebox.showerror("Error", "No authors in system.")
+            return
+        win = tk.Toplevel(self)
+        win.title("Choose Author to Edit")
+        tk.Label(win, text="Select Author").pack(pady=6)
+        lb = tk.Listbox(win, width=60, height=12); lb.pack()
+        for a in all_authors:
+            lb.insert(tk.END, a.display_str())
+
+        def open_editor():
+            sel = lb.curselection()
+            if not sel:
+                messagebox.showerror("Error", "Select an author.")
+                return
+            auth = all_authors[sel[0]]
+            win.destroy()
+            self.open_edit_author(auth)
+
+        tk.Button(win, text="Edit Selected", command=open_editor).pack(pady=8)
+
+    def open_edit_author(self, auth):
+        win = tk.Toplevel(self)
+        win.title("Edit Author")
+        tk.Label(win, text="Author ID (not editable)").pack()
+        id_entry = tk.Entry(win); id_entry.pack()
+        id_entry.insert(0, auth.authorID); id_entry.config(state="disabled")
+        tk.Label(win, text="Author Name").pack()
+        name_entry = tk.Entry(win); name_entry.pack(); name_entry.insert(0, auth.authorName)
+        tk.Label(win, text="Country").pack()
+        country_entry = tk.Entry(win); country_entry.pack(); country_entry.insert(0, auth.country)
+
+        def save_changes():
+            auth.authorName = name_entry.get().strip()
+            auth.country = country_entry.get().strip()
+            messagebox.showinfo("Success", "Author updated.")
+            win.destroy()
+
+        tk.Button(win, text="Save Changes", command=save_changes).pack(pady=10)
+
+    def open_assign_book(self):
+        if not all_authors:
+            messagebox.showerror("Error", "No authors in the system.")
+            return
+        if not all_books:
+            messagebox.showerror("Error", "No books in the system.")
+            return
+        win = tk.Toplevel(self)
+        win.title("Assign Book to Author")
+        tk.Label(win, text="Select Author").pack()
+        auth_lb = tk.Listbox(win, width=60, height=6, exportselection=0); auth_lb.pack()
+        for a in all_authors:
+            auth_lb.insert(tk.END, a.display_str())
+        tk.Label(win, text="Select Book").pack()
+        book_lb = tk.Listbox(win, width=60, height=10, exportselection=0); book_lb.pack()
+        for b in all_books:
+            book_lb.insert(tk.END, b.display_str())
+
+        def assign():
+            sela = auth_lb.curselection()
+            selb = book_lb.curselection()
+            if not sela or not selb:
+                messagebox.showerror("Error", "Select author and book.")
+                return
+            a = all_authors[sela[0]]
+            b = all_books[selb[0]]
+            if b in a.booksWritten:
+                messagebox.showerror("Error", "Book already assigned to author.")
+                return
+            a.booksWritten.append(b)
+            messagebox.showinfo("Success", f"Assigned '{b.Title}' to {a.authorName}.")
+            win.destroy()
+
+        tk.Button(win, text="Assign", command=assign).pack(pady=10)
+
+# ---------------------- ADMIN MENU ---------------------- #
 class AdminMenu(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
+        self.master = master
 
-        tk.Label(self, text="Admin Menu", font=("Arial", 18)).pack(pady=20)
+        tk.Label(self, text="Admin Menu", font=("Arial", 18)).pack(pady=12)
 
-        tk.Button(self, text="Add Admin", width=20).pack(pady=5)
-        tk.Button(self, text="Edit Admin", width=20).pack(pady=5)
+        tk.Button(self, text="Add Admin", width=20, command=self.open_add_admin).pack(pady=5)
+        tk.Button(self, text="Edit Admin", width=20, command=self.open_choose_edit_admin).pack(pady=5)
+        tk.Button(self, text="Display Admins", width=20, command=self.display_admins).pack(pady=5)
+        tk.Button(self, text="Back", width=20, command=lambda: master.show_frame(MainMenu)).pack(pady=12)
 
-        tk.Button(self, text="Back", width=20,
-                  command=lambda: master.show_frame(MainMenu)).pack(pady=20)
+    def open_add_admin(self):
+        win = tk.Toplevel(self)
+        win.title("Add Admin")
+        tk.Label(win, text="Admin ID").pack()
+        id_entry = tk.Entry(win); id_entry.pack()
+        tk.Label(win, text="Name").pack()
+        name_entry = tk.Entry(win); name_entry.pack()
+        tk.Label(win, text="Position").pack()
+        pos_entry = tk.Entry(win); pos_entry.pack()
+        tk.Label(win, text="Password").pack()
+        pass_entry = tk.Entry(win, show="*"); pass_entry.pack()
+        tk.Label(win, text="Email").pack()
+        email_entry = tk.Entry(win); email_entry.pack()
+
+        def save():
+            aid = id_entry.get().strip()
+            name = name_entry.get().strip()
+            if not aid or not name:
+                messagebox.showerror("Error", "Admin ID and Name required.")
+                return
+            if any(ad.adminID == aid for ad in all_admins):
+                messagebox.showerror("Error", "Admin ID exists.")
+                return
+            ad = Admin()
+            ad.adminID = aid
+            ad.name = name
+            ad.position = pos_entry.get().strip()
+            ad.password = pass_entry.get().strip()
+            ad.email = email_entry.get().strip()
+            all_admins.append(ad)
+            messagebox.showinfo("Success", f"Admin '{ad.name}' added.")
+            win.destroy()
+
+        tk.Button(win, text="Save", command=save).pack(pady=10)
+
+    def open_choose_edit_admin(self):
+        if not all_admins:
+            messagebox.showerror("Error", "No admins in system.")
+            return
+        win = tk.Toplevel(self)
+        win.title("Choose Admin to Edit")
+        tk.Label(win, text="Select Admin").pack(pady=6)
+        lb = tk.Listbox(win, width=60, height=12); lb.pack()
+        for a in all_admins:
+            lb.insert(tk.END, a.display_str())
+
+        def open_editor():
+            sel = lb.curselection()
+            if not sel:
+                messagebox.showerror("Error", "Select an admin.")
+                return
+            ad = all_admins[sel[0]]
+            win.destroy()
+            self.open_edit_admin(ad)
+
+        tk.Button(win, text="Edit Selected", command=open_editor).pack(pady=8)
+
+    def open_edit_admin(self, ad):
+        win = tk.Toplevel(self)
+        win.title("Edit Admin")
+        tk.Label(win, text="Admin ID (not editable)").pack()
+        id_entry = tk.Entry(win); id_entry.pack(); id_entry.insert(0, ad.adminID); id_entry.config(state="disabled")
+        tk.Label(win, text="Name").pack()
+        name_entry = tk.Entry(win); name_entry.pack(); name_entry.insert(0, ad.name)
+        tk.Label(win, text="Position").pack()
+        pos_entry = tk.Entry(win); pos_entry.pack(); pos_entry.insert(0, ad.position)
+        tk.Label(win, text="Password").pack()
+        pass_entry = tk.Entry(win, show="*"); pass_entry.pack(); pass_entry.insert(0, ad.password)
+        tk.Label(win, text="Email").pack()
+        email_entry = tk.Entry(win); email_entry.pack(); email_entry.insert(0, ad.email)
+
+        def save_changes():
+            ad.name = name_entry.get().strip()
+            ad.position = pos_entry.get().strip()
+            ad.password = pass_entry.get().strip()
+            ad.email = email_entry.get().strip()
+            messagebox.showinfo("Success", "Admin updated.")
+            win.destroy()
+
+        tk.Button(win, text="Save Changes", command=save_changes).pack(pady=10)
+
+    def display_admins(self):
+        if not all_admins:
+            messagebox.showinfo("Admins", "No admins in system.")
+            return
+        win = tk.Toplevel(self)
+        win.title("All Admins")
+        txt = tk.Text(win, width=70, height=18); txt.pack(padx=6, pady=6)
+        for a in all_admins:
+            txt.insert(tk.END, f"ID:{a.adminID} | {a.name} | Position: {a.position} | Email: {a.email}\n")
+        txt.config(state="disabled")
 
 # ---------------------- RUN APP ---------------------- #
-app = App()
-app.mainloop()
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
+
