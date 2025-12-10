@@ -192,6 +192,8 @@ class MemberMenu(tk.Frame):
                 return
             member = all_members[selm[0]]
             book = available[selb[0]]
+            if len(member.booksborrowed) >= 5:
+                messagebox.showerror("Limit Reached", f"{member.member_name} This member has already borrowed 5 books")
             result = member.borrow_book(book)
             if result == "Success":
                 messagebox.showinfo("Success", f"{member.member_name} borrowed '{book.Title}'")
@@ -628,4 +630,3 @@ class AdminMenu(tk.Frame):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
