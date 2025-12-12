@@ -1,8 +1,10 @@
+
 all_members = []
 all_books = []
 all_admins = []
 all_authors = []
 
+import pickle
 import tkinter as tk
 from tkinter import messagebox
 
@@ -73,6 +75,34 @@ class Admin:
     def display_str(self):
         return f"{self.name} (ID:{self.adminID})"
 
+
+# ------------------- .DAT FILE ----------------------#
+def save_data():
+    with open("library_data.dat", "wb") as f:
+        pickle.dump({
+            "members": all_members,
+            "books": all_books,
+            "authors": all_authors,
+            "admins": all_admins
+        }, f)
+    print("Data saved successfully!")
+
+
+def load_data():
+    global all_members, all_books, all_authors, all_admins
+
+    try:
+        with open("library_data.dat", "rb") as f:
+            data = pickle.load(f)
+            all_members = data["members"]
+            all_books = data["books"]
+            all_authors = data["authors"]
+            all_admins = data["admins"]
+        print("Data loaded successfully!")
+    except FileNotFoundError:
+        print("No save file found - starting fresh.")
+
+
 # ---------------------- APP (frame manager) ---------------------- #
 class App(tk.Tk):
     def __init__(self):
@@ -111,7 +141,13 @@ class MainMenu(tk.Frame):
                   command=lambda: master.show_frame(AuthorMenu)).pack(pady=6)
         tk.Button(btn_frame, text="Admins", width=18, height=2,
                   command=lambda: master.show_frame(AdminMenu)).pack(pady=6)
-        tk.Button(self, text="Exit", width=18, height=2, command=master.destroy).pack(pady=10)
+        tk.Button(btn_frame, text="Exit", width=18, height=2, command=master.destroy).pack(pady=10)
+
+        tk.Button(btn_frame, text="Save Data", width=20, height=2,
+                  command=save_data).pack(pady=10)
+        tk.Button(btn_frame, text="Load Data", width=20, height=2,
+                  command=load_data).pack(pady=10)
+
 
 # ---------------------- MEMBER MENU ---------------------- #
 class MemberMenu(tk.Frame):
@@ -189,11 +225,11 @@ class MemberMenu(tk.Frame):
                 return
             if not selb:
                 messagebox.showerror("Error", "Select a book.")
-                return
             member = all_members[selm[0]]
             book = available[selb[0]]
             if len(member.booksborrowed) >= 5:
                 messagebox.showerror("Limit Reached", f"{member.member_name} This member has already borrowed 5 books")
+                return
             result = member.borrow_book(book)
             if result == "Success":
                 messagebox.showinfo("Success", f"{member.member_name} borrowed '{book.Title}'")
@@ -630,3 +666,5 @@ class AdminMenu(tk.Frame):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+
+
